@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.2" type="incidents">
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel than 2.9.4 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.9.4"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="${:shared*projectDir}/build.gradle.kts"
+            line="19"
+            column="17"
+            startOffset="451"
+            endLine="19"
+            endColumn="63"
+            endOffset="497"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of `compileSdkVersion` than 35 is available: 36">
+        <fix-replace
+            description="Set compileSdkVersion to 36"
+            oldString="35"
+            replacement="36"
+            priority="0"/>
+        <location
+            file="${:shared*projectDir}/build.gradle.kts"
+            line="31"
+            column="5"
+            startOffset="835"
+            endLine="31"
+            endColumn="20"
+            endOffset="850"/>
+    </incident>
+
+    <incident
+        id="NewerVersionAvailable"
+        severity="warning"
+        message="A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-core than 1.9.0 is available: 1.11.0">
+        <fix-replace
+            description="Change to 1.11.0"
+            family="Update versions"
+            oldString="1.9.0"
+            replacement="1.11.0"
+            priority="0"/>
+        <location
+            file="${:shared*projectDir}/build.gradle.kts"
+            line="20"
+            column="17"
+            startOffset="515"
+            endLine="20"
+            endColumn="70"
+            endOffset="568"/>
+    </incident>
+
+</incidents>

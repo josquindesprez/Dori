@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#F8EDDC</color>
+    <string name="app_name">Dori</string>
+    <style name="Theme.Dori" parent="android:Theme.Material.Light.NoActionBar"/>
+</resources>
