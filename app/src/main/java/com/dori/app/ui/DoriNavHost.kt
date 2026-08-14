@@ -11,6 +11,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -21,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import java.time.LocalDate
 
 private object Routes {
     const val NOTES = "notes"
@@ -28,6 +30,7 @@ private object Routes {
     const val TRACKER = "tracker"
     const val LABELS = "labels"
     const val SUBSTANCES = "substances"
+    const val SETTINGS = "settings"
     const val EDITOR = "editor?noteId={noteId}&diaryDate={diaryDate}"
 
     fun editor(noteId: Long = -1L, diaryDateEpochDay: Long? = null): String =
@@ -43,10 +46,20 @@ private val topLevelDestinations = listOf(
 )
 
 @Composable
-fun DoriApp() {
+fun DoriApp(pendingShareTrigger: Long? = null) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination
+
+    // A share received from another app (e.g. Research Reader) has already
+    // been stashed in PendingShare by the time this fires; we just need to
+    // land on a fresh editor so it can be picked up. Keyed on the trigger
+    // (not the text) so an identical share sent twice still re-navigates.
+    LaunchedEffect(pendingShareTrigger) {
+        if (pendingShareTrigger != null) {
+            navController.navigate(Routes.editor(diaryDateEpochDay = LocalDate.now().toEpochDay()))
+        }
+    }
 
     val showBottomBar = topLevelDestinations.any { dest ->
         currentRoute?.hierarchy?.any { it.route == dest.route } == true
@@ -86,8 +99,12 @@ fun DoriApp() {
                 NotesScreen(
                     onNoteClick = { id -> navController.navigate(Routes.editor(noteId = id)) },
                     onCreateNote = { navController.navigate(Routes.editor()) },
-                    onManageLabels = { navController.navigate(Routes.LABELS) }
+                    onManageLabels = { navController.navigate(Routes.LABELS) },
+                    onOpenSettings = { navController.navigate(Routes.SETTINGS) }
                 )
+            }
+            composable(Routes.SETTINGS) {
+                SettingsScreen(onBack = { navController.popBackStack() })
             }
             composable(Routes.DIARY) {
                 DiaryScreen(

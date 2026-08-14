@@ -9,6 +9,7 @@ import com.dori.app.data.Label
 import com.dori.app.data.Note
 import com.dori.app.data.NoteRepository
 import com.dori.app.data.OpenEditorRegistry
+import com.dori.app.data.PendingShare
 import kotlin.reflect.KClass
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -55,7 +56,11 @@ class EditorViewModel(
         EditorUiState(
             diaryDate = initialDiaryDate,
             isLoading = noteId != null,
-            uuid = if (noteId == null) UUID.randomUUID().toString() else ""
+            uuid = if (noteId == null) UUID.randomUUID().toString() else "",
+            // A brand new editor is the only time it's safe to claim a pending
+            // share - reusing an existing note must never splice foreign text
+            // into it.
+            body = if (noteId == null) PendingShare.consume().orEmpty() else ""
         )
     )
     val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()

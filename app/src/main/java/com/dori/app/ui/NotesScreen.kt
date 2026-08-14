@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Sell
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -38,7 +39,8 @@ import com.dori.app.viewmodel.NotesViewModel
 fun NotesScreen(
     onNoteClick: (Long) -> Unit,
     onCreateNote: () -> Unit,
-    onManageLabels: () -> Unit
+    onManageLabels: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: NotesViewModel = viewModel(
@@ -55,6 +57,9 @@ fun NotesScreen(
                 actions = {
                     IconButton(onClick = onManageLabels) {
                         Icon(Icons.Filled.Sell, contentDescription = "Manage labels")
+                    }
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
                     }
                 }
             )
