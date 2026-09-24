@@ -78,12 +78,51 @@ data class SyncResponse(
     val entries: List<SubstanceEntryDto> = emptyList()
 )
 
+/**
+ * deviceName is only filled in while pairing is open, so an idle Dori doesn't
+ * announce itself by name to everyone on the network. groupTag lets members
+ * of the same group recognise each other (see SyncCrypto.beaconTag).
+ */
 @Serializable
 data class DiscoveryBeacon(
     val deviceId: String,
-    val deviceName: String,
-    val syncPort: Int
+    val deviceName: String = "",
+    val syncPort: Int,
+    val groupTag: String? = null,
+    val pairingOpen: Boolean = false
 )
+
+/** First (plaintext) message on every connection; mode is SYNC_MODE or PAIR_MODE. */
+@Serializable
+data class ClientHello(
+    val mode: String,
+    val deviceId: String,
+    /** Sync: base64 random nonce. */
+    val nonce: String = "",
+    /** Pairing: shown to the other side. */
+    val deviceName: String = "",
+    /** Pairing: base64 SHA-256 of the joiner's public key, revealed only after the inviter's key is sent. */
+    val commitment: String = ""
+)
+
+@Serializable
+data class ServerHello(
+    val deviceId: String,
+    val nonce: String = "",
+    val deviceName: String = "",
+    val publicKey: String = ""
+)
+
+@Serializable
+data class PairReveal(val publicKey: String)
+
+/** Sent by the inviter, encrypted, once its user has confirmed the code. */
+@Serializable
+data class PairGrant(val groupId: String, val groupKey: String)
+
+/** Sent by the joiner, encrypted: whether its user confirmed the code too. */
+@Serializable
+data class PairAck(val accepted: Boolean)
 
 fun Note.toDto() = NoteDto(
     uuid = uuid,

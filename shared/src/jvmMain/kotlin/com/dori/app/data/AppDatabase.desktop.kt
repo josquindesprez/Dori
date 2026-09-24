@@ -52,6 +52,20 @@ private val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+private val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `sync_group` (
+                `id` INTEGER NOT NULL PRIMARY KEY,
+                `groupId` TEXT NOT NULL,
+                `groupKey` TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 fun createDesktopDatabase(): AppDatabase {
     // Roaming AppData, not Local: Local is where the installer puts the app's
     // own binaries (a per-user MSI install defaults to %LOCALAPPDATA%\Dori,
@@ -64,6 +78,6 @@ fun createDesktopDatabase(): AppDatabase {
     return Room.databaseBuilder<AppDatabase>(name = dbFile.absolutePath)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
-        .addMigrations(MIGRATION_3_4)
+        .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
         .build()
 }

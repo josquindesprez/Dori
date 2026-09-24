@@ -23,6 +23,9 @@ kotlin {
         jvmMain.dependencies {
             implementation("androidx.sqlite:sqlite-bundled:2.7.0")
         }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 

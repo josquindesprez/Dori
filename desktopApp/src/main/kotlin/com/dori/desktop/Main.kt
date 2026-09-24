@@ -21,9 +21,10 @@ fun main() {
         syncPeerStateDao = database.syncPeerStateDao(),
         substanceDao = database.substanceDao(),
         substanceEntryDao = database.substanceEntryDao(),
-        deviceName = "Windows"
+        syncGroupDao = database.syncGroupDao(),
+        deviceName = desktopDeviceName()
     )
-    SyncEngine(repository).start()
+    val syncEngine = SyncEngine(repository).apply { start() }
 
     val appIcon = Thread.currentThread().contextClassLoader
         .getResourceAsStream("icon.png")
@@ -41,7 +42,18 @@ fun main() {
                 height = 700.dp
             )
         ) {
-            DoriDesktopApp(repository)
+            DoriDesktopApp(repository, syncEngine)
         }
     }
+}
+
+/** Shown to the other device during pairing, e.g. "laptop (Linux)". */
+private fun desktopDeviceName(): String {
+    val os = System.getProperty("os.name") ?: "Desktop"
+    val host = try {
+        java.net.InetAddress.getLocalHost().hostName
+    } catch (e: Exception) {
+        null
+    }
+    return if (host.isNullOrBlank()) os else "$host ($os)"
 }

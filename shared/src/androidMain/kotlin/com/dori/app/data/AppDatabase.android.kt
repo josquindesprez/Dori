@@ -140,9 +140,25 @@ private val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+// No row is inserted here: NoteRepository creates this device's own group on
+// first use, the same way it lazily creates the device identity.
+private val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `sync_group` (
+                `id` INTEGER NOT NULL PRIMARY KEY,
+                `groupId` TEXT NOT NULL,
+                `groupKey` TEXT NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}
+
 fun createAndroidDatabase(context: Context): AppDatabase =
     Room.databaseBuilder(
         context.applicationContext,
         AppDatabase::class.java,
         "dori.db"
-    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
