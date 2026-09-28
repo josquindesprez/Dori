@@ -11,5 +11,7 @@ local.properties
 
 # Local database backups and device captures
 db-backups/
+*.db
+*.db.lck
 *.db-shm
 *.db-wal
