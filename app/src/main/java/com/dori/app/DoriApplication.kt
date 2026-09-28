@@ -1,6 +1,8 @@
 package com.dori.app
 
 import android.app.Application
+import android.net.wifi.WifiManager
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,9 +25,12 @@ class DoriApplication : Application() {
             syncPeerStateDao = database.syncPeerStateDao(),
             substanceDao = database.substanceDao(),
             substanceEntryDao = database.substanceEntryDao(),
-            deviceName = "Android"
+            syncGroupDao = database.syncGroupDao(),
+            deviceName = Build.MODEL ?: "Android"
         )
     }
+
+    val syncEngine: SyncEngine by lazy { SyncEngine(repository) }
 
     val lockPreferences by lazy { AppLockPreferences(this) }
 
@@ -41,7 +46,13 @@ class DoriApplication : Application() {
         // Runs for as long as this process is alive - i.e. "while the app is
         // open," including backgrounded but not killed by the OS. No manual
         // "sync now" step: discovery and exchange both happen automatically.
-        SyncEngine(repository).start()
+        // Many phones drop incoming broadcast packets to save battery unless
+        // an app holds this lock - without it, beacons from other devices
+        // (and so discovery and pairing) silently never arrive.
+        (applicationContext.getSystemService(WIFI_SERVICE) as? WifiManager)
+            ?.createMulticastLock("dori-sync")
+            ?.apply { setReferenceCounted(false); acquire() }
+        syncEngine.start()
 
         // Process-level, not Activity-level: a screen rotation destroys and recreates
         // MainActivity without this firing, but truly backgrounding the app does.

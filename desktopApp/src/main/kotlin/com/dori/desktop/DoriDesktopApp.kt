@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Sell
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.dori.app.data.NoteRepository
+import com.dori.app.sync.SyncEngine
 import java.time.LocalDate
 
 sealed interface Pane {
@@ -29,11 +31,12 @@ sealed interface Pane {
     data object Tracker : Pane
     data object Labels : Pane
     data object Substances : Pane
+    data object Sync : Pane
     data class Editor(val noteId: Long?, val initialDiaryDate: LocalDate?, val returnTo: Pane) : Pane
 }
 
 @Composable
-fun DoriDesktopApp(repository: NoteRepository) {
+fun DoriDesktopApp(repository: NoteRepository, syncEngine: SyncEngine) {
     var currentPane by remember { mutableStateOf<Pane>(Pane.Notes) }
 
     DoriDesktopTheme {
@@ -70,6 +73,12 @@ fun DoriDesktopApp(repository: NoteRepository) {
                         icon = { Icon(Icons.Filled.Science, contentDescription = "Substances") },
                         label = { Text("Substances") }
                     )
+                    NavigationRailItem(
+                        selected = currentPane is Pane.Sync,
+                        onClick = { currentPane = Pane.Sync },
+                        icon = { Icon(Icons.Filled.Sync, contentDescription = "Sync") },
+                        label = { Text("Sync") }
+                    )
                 }
             }
 
@@ -92,6 +101,8 @@ fun DoriDesktopApp(repository: NoteRepository) {
                     is Pane.Labels -> LabelsPane(repository = repository)
 
                     is Pane.Substances -> SubstancesPane(repository = repository)
+
+                    is Pane.Sync -> SyncPane(engine = syncEngine)
 
                     is Pane.Editor -> EditorPane(
                         repository = repository,

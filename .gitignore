@@ -1,0 +1,17 @@
+# Build output
+build/
+.gradle/
+.kotlin/
+
+# Machine-specific
+local.properties
+.claude/*.lock
+.idea/
+*.iml
+
+# Local database backups and device captures
+db-backups/
+*.db
+*.db.lck
+*.db-shm
+*.db-wal

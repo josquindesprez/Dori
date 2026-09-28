@@ -3,6 +3,7 @@
 
     <!-- LAN-only sync with other Dori installs on the same WiFi network. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <application
         android:name=".DoriApplication"

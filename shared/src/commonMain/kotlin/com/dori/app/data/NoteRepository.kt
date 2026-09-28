@@ -13,7 +13,8 @@ class NoteRepository(
     private val syncPeerStateDao: SyncPeerStateDao,
     private val substanceDao: SubstanceDao,
     private val substanceEntryDao: SubstanceEntryDao,
-    private val deviceName: String
+    private val syncGroupDao: SyncGroupDao,
+    val deviceName: String
 ) {
 
     fun getLooseNotes(): Flow<List<Note>> = noteDao.getLooseNotes()
@@ -134,6 +135,35 @@ class NoteRepository(
         val deviceId = getOrCreateDeviceIdentity().deviceId
         val uuid = entry.uuid.ifBlank { UUID.randomUUID().toString() }
         return entry.copy(uuid = uuid, originDeviceId = deviceId)
+    }
+
+    @Volatile
+    private var cachedSyncGroup: SyncGroup? = null
+    private val syncGroupMutex = Mutex()
+
+    /** This device's sync group, creating a group of one on first use. */
+    suspend fun getOrCreateSyncGroup(): SyncGroup {
+        cachedSyncGroup?.let { return it }
+        return syncGroupMutex.withLock {
+            cachedSyncGroup?.let { return@withLock it }
+            val group = syncGroupDao.get() ?: newSyncGroup().also { syncGroupDao.upsert(it) }
+            cachedSyncGroup = group
+            group
+        }
+    }
+
+    /** Adopts another device's group after a confirmed pairing; this device's data then syncs into it. */
+    suspend fun joinSyncGroup(group: SyncGroup) {
+        syncGroupMutex.withLock {
+            val joined = group.copy(id = 0)
+            syncGroupDao.upsert(joined)
+            cachedSyncGroup = joined
+        }
+    }
+
+    private fun newSyncGroup(): SyncGroup {
+        val key = ByteArray(32).also { java.security.SecureRandom().nextBytes(it) }
+        return SyncGroup(groupId = UUID.randomUUID().toString(), groupKey = java.util.Base64.getEncoder().encodeToString(key))
     }
 
     suspend fun getNotesUpdatedSince(sinceMillis: Long): List<Note> = noteDao.getNotesUpdatedSince(sinceMillis)
